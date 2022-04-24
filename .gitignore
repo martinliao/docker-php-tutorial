@@ -9,3 +9,4 @@ secret.gpg
 !*.secret
 passwords.txt
 .build
+gcp-service-account-key.json
