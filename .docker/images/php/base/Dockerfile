@@ -97,8 +97,16 @@ RUN --mount=type=cache,target=/tmp/.composer \
     # COMPOSER_HOME=/tmp/.composer sets the home directory of composer that
     # also controls where composer looks for the cache 
     # so we don't have to download dependencies again (if they are cached)
-    COMPOSER_HOME=/tmp/.composer composer install --no-scripts --no-plugins --no-progress -o 
-
+    # @see https://stackoverflow.com/a/60518444 for the correct if-then-else syntax:
+    # - end all commands with ; \
+    # - except THEN and ELSE
+    if [ "$ENV" == "prod" ] ; \
+    then \
+      # on production, we don't want test dependencies
+      COMPOSER_HOME=/tmp/.composer composer install --no-scripts --no-plugins --no-progress -o --no-dev; \
+    else  \
+      COMPOSER_HOME=/tmp/.composer composer install --no-scripts --no-plugins --no-progress -o; \
+    fi
 # copy the full codebase
 COPY . /codebase
 
@@ -106,8 +114,17 @@ RUN mv /dependencies/vendor /codebase/vendor && \
     cd /codebase && \
     # remove files we don't require in the image to keep the image size small
     rm -rf .docker/ && \
+    if [ "$ENV" == "prod" ] ; \
+    then \
+      # on production, we don't want tests
+      rm -rf /codebase/tests; \
+    fi && \
     # we need a git repository for git-secret to work (can be an empty one)
     git init
+
+FROM base as prod
+
+COPY --from=codebase --chown=$APP_USER_NAME:$APP_GROUP_NAME /codebase $APP_CODE_PATH
 
 FROM base as ci
 

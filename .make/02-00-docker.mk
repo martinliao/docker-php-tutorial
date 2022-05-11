@@ -26,17 +26,21 @@ DOCKER_SERVICE_NAME_APPLICATION:=application
 DOCKER_DIR:=./.docker
 DOCKER_ENV_FILE:=$(DOCKER_DIR)/.env
 DOCKER_COMPOSE_DIR:=$(DOCKER_DIR)/docker-compose
-DOCKER_COMPOSE_FILE_LOCAL_CI:=$(DOCKER_COMPOSE_DIR)/docker-compose.local.ci.yml
-DOCKER_COMPOSE_FILE_CI:=$(DOCKER_COMPOSE_DIR)/docker-compose.ci.yml
+DOCKER_COMPOSE_FILE_LOCAL_CI_PROD:=$(DOCKER_COMPOSE_DIR)/docker-compose.local.ci.prod.yml
+DOCKER_COMPOSE_FILE_LOCAL_PROD:=$(DOCKER_COMPOSE_DIR)/docker-compose.local.prod.yml
 DOCKER_COMPOSE_FILE_LOCAL:=$(DOCKER_COMPOSE_DIR)/docker-compose.local.yml
+DOCKER_COMPOSE_FILE_CI:=$(DOCKER_COMPOSE_DIR)/docker-compose.ci.yml
+DOCKER_COMPOSE_FILE_PROD:=$(DOCKER_COMPOSE_DIR)/docker-compose.prod.yml
 DOCKER_COMPOSE_FILE_PHP_BASE:=$(DOCKER_COMPOSE_DIR)/docker-compose-php-base.yml
 DOCKER_COMPOSE_PROJECT_NAME:=dofroscra_$(ENV)
 
 # we need to "assemble" the correct combination of docker-compose.yml config files
-ifeq ($(ENV),ci)
-	DOCKER_COMPOSE_FILES:=-f $(DOCKER_COMPOSE_FILE_LOCAL_CI) -f $(DOCKER_COMPOSE_FILE_CI)
+ifeq ($(ENV),prod)
+	DOCKER_COMPOSE_FILES:=-f $(DOCKER_COMPOSE_FILE_LOCAL_CI_PROD) -f $(DOCKER_COMPOSE_FILE_LOCAL_PROD) -f $(DOCKER_COMPOSE_FILE_PROD)
+else ifeq ($(ENV),ci)
+	DOCKER_COMPOSE_FILES:=-f $(DOCKER_COMPOSE_FILE_LOCAL_CI_PROD) -f $(DOCKER_COMPOSE_FILE_CI)
 else ifeq ($(ENV),local)
-	DOCKER_COMPOSE_FILES:=-f $(DOCKER_COMPOSE_FILE_LOCAL_CI) -f $(DOCKER_COMPOSE_FILE_LOCAL)
+	DOCKER_COMPOSE_FILES:=-f $(DOCKER_COMPOSE_FILE_LOCAL_CI_PROD) -f $(DOCKER_COMPOSE_FILE_LOCAL_PROD) -f $(DOCKER_COMPOSE_FILE_LOCAL)
 endif
 
 # we need a couple of environment variables for docker-compose so we define a make-variable that we can
@@ -124,3 +128,14 @@ docker-config: validate-docker-variables ## List the configuration
 .PHONY: docker-prune
 docker-prune: ## Remove ALL unused docker resources, including volumes
 	@docker system prune -a -f --volumes
+
+# @see https://www.linuxfixes.com/2022/01/solved-how-to-test-dockerignore-file.html
+.PHONY: docker-show-build-context
+docker-show-build-context: ## Show all files that are in the docker build context (helpful to debug a .dockerignore file)
+	@docker image build --no-cache -t build-context -f - . <<EOF \
+    	FROM busybox \
+    	WORKDIR /build-context  \
+    	COPY . .  \
+    	CMD find .  \
+    EOF 
+	@docker run --rm build-context

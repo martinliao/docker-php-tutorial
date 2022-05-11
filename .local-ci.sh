@@ -13,7 +13,7 @@ cp secret-protected.gpg.example secret.gpg
 # DEBUG
 docker version
 docker compose version
-cat /etc/*-release || true
+  cat /etc/*-release || true
 
 # SETUP DOCKER
 make make-init ENVS="ENV=ci TAG=latest EXECUTE_IN_CONTAINER=true GPG_PASSWORD=12345678"
@@ -48,7 +48,7 @@ end_total=$(date +%s)
 
 # RUNTIMES
 echo "Build docker:        " `expr $end_docker_build - $start_docker_build`
-echo "Start docker:        " `expr $end_docker_up - $start_docker_up  `
+echo "Start docker:        " `expr $end_docker_up - $start_docker_up`
 echo "QA:                  " `expr $end_qa - $start_qa`
 echo "Wait for containers: " `expr $end_wait_for_containers - $start_wait_for_containers`
 echo "Tests:               " `expr $end_test - $start_test`

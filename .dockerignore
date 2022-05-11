@@ -1,6 +1,6 @@
 # gitignore
 !.env.example
-.env
+**/.env
 .idea
 .phpunit.result.cache
 vendor/
@@ -13,3 +13,10 @@ passwords.txt
 
 # additionally ignored files
 .git
+# storage/ usually contains cached files (e.g. for views) or logs
+storage/*
+# bootstrap/cache/ contains cached files for packages and service providers
+bootstrap/cache/*
+# make sure to keep all .gitignore and .gitkeep files
+!**/.gitignore
+!**/.gitkeep

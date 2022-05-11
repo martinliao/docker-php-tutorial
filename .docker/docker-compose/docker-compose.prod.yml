@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  php-fpm:
+    volumes:
+      - ${APP_CODE_PATH_HOST?}/secret.gpg:${APP_CODE_PATH_CONTAINER?}/secret.gpg:ro
+      
+  php-worker:
+    volumes:
+      - ${APP_CODE_PATH_HOST?}/secret.gpg:${APP_CODE_PATH_CONTAINER?}/secret.gpg:ro
+  
+  application:
+    volumes:
+      - ${APP_CODE_PATH_HOST?}/secret.gpg:${APP_CODE_PATH_CONTAINER?}/secret.gpg:ro

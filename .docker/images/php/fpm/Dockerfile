@@ -20,4 +20,6 @@ EXPOSE 9000
 
 CMD ["php-fpm", "-F"]
 
+FROM base as prod
+
 FROM base as local

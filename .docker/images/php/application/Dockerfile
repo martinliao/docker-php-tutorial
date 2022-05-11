@@ -1,6 +1,8 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE} as base
 
+FROM base as prod
+
 FROM base as ci
 
 FROM base as local
